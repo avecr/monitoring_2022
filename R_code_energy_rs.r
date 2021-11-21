@@ -1,7 +1,9 @@
 # R code for estimating energy in ecosystems
 # install_packages("raster")
+# install_packages("rgdal")
  
 library(raster)
+library(rgdal)
  
 # set the working directory
 setwd("/Users/anareis/OneDrive/MECF_R_Project/lab")
