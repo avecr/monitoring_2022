@@ -82,7 +82,7 @@ plot(dvi2006, col=cl)
 plot(dvidif, col=cld)
 dev.off() # dev.off here it is need to close the pdf file
 
-# put the images in a pdf file, but this time one following the other
+# put the images in a pdf file, but this time one image after the other
 pdf("dvi.pdf")
 par(mfrow=c(3, 1))
 plotRGB(l1992, r=1, g=2, b=3, stretch="Lin")
