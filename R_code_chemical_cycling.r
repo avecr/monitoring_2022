@@ -73,3 +73,38 @@ plot(EN$EN_0001, col=cl)
 # let's plot a RGB space 
 plotRGB(EN, r=1, g=7, b=13, strech="lin") # red layer=beggining of lockdown, blue=intermediary Feb, green=end Mar
 
+#------day 2
+
+# first, explain the working directory where the data is located
+
+library(raster)
+
+# set the working directory
+setwd("/Users/anareis/OneDrive/MECF_R_Project/lab/en/") # mac
+
+# importing all the data (images) together with the lapply function 
+rlist <- list.files(pattern="EN")
+rlist # check the data as a list
+
+# use the lapply function to apply the raster function into the list created (rlist)
+list_rast <- lapply(rlist, raster)
+list_rast # check all the data (images) that have been imported together
+
+# use the stack function to put all the data together
+EN_stack <- stack(list_rast)
+
+# let's plot with the colorRampPalette from the last lesson
+cl <- colorRampPalette(c('red','orange','yellow'))(100)
+plot(EN_stack, col=cl)
+
+# let's plot only the first image from the stack
+plot(EN_stack$EN_0001, col=cl)
+
+# difference between two images using those functions lernt (1 - 13)
+ENdif <- EN_stack$EN_0001 - EN_stack$EN_0013
+cl <- colorRampPalette(c('blue','white','red'))(100)
+plot(ENdif, col=cl)
+
+# automated processing source function
+# first, save a file with the code that you want to run, with the extension .txt
+source("R_code_automatic_script.txt")
