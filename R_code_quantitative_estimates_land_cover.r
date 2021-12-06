@@ -1,9 +1,12 @@
 # R_code_quantitative_estimates_land_cover.r
 # quantitative estimation of the amount of land cover lost in the tropical forest near to Rio Peixoto (MT)
 
+install.packages(gridExtra)
 library(raster)
-library(RStoolbox)
+library(RStoolbox) #use that only for the classification process 
 library(ggplot2)
+library(gridExtra)
+library(grid.arrange) # put several graphs in the same multiframe
 
 # set the working directory
 setwd("/Users/anareis/OneDrive/MECF_R_Project/lab") # mac
@@ -62,7 +65,8 @@ propagri <- 34958 / total
 
 # buid a dataframe
 cover <- c("Forest", "Agriculture")
-prop1992 <- c(0.8975716, 0.1024284)
+prop1992 <- c(propforest, propagri)
+# prop1992 <- c(0.8975716, 0.1024284)
 
 proportion1992 <- data.frame(cover, prop1992) # proportion of pixels in 1992
 proportion1992 # real proportions/values of cover (forest) and agriculture
@@ -72,5 +76,48 @@ proportion1992 # real proportions/values of cover (forest) and agriculture
 # 2 Agriculture 0.1024284
 
 # make a histogram with the values found (cover+prop1992) // functions ggplot2() + geom_bar()
-ggplot2(proportion1992, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") # identity use the values as they are
+ggplot(proportion1992, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") # identity use the values as they are
+
+# classification of 2006 // Unsupervised classification
+# repeat the code with the data from 2006
+
+l2006c <- unsuperClass(l2006, nClasses=2)
+l2006c
+
+plot(l2006c$map) 
+
+freq(l2006c$map)
+# value  count
+# [1,]     1 178098
+# [2,]     2 164628
+# forest (class 1)
+# agricultural areas and water (class 2)
+
+total2006 <- 342726
+propforest2006 <- 178098 / total
+propagri2006 <- 164628 / total
+
+cover <- c("Forest", "Agriculture")
+prop1992 <- c(propforest, propagri)
+prop2006 <- c(propforest2006, propagri2006)
+
+proportion2006 <- data.frame(cover, prop2006) # proportion of pixels in 1992
+proportion2006
+
+proportion <- data.frame(cover, prop1992, prop2006)
+
+ggplot(proportion1992, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") # identity use the values as they are
+
+ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white") # identity use the values as they are
+
+
+p1 <- ggplot(proportion1992, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white")
+p2 <- ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white")
+ 
+grid.arrange(p1, p2, nrows=1)
+
+# change the graphs scale to the same so it could be better to compared adding the "ylim()" argument
+ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+ggplot(proportion, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+
 
