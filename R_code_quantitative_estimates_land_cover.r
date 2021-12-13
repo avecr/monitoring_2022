@@ -2,6 +2,7 @@
 # quantitative estimation of the amount of land cover lost in the tropical forest near to Rio Peixoto (MT)
 
 install.packages(gridExtra)
+install.packages(patchwork)
 library(raster)
 library(RStoolbox) #use that only for the classification process 
 library(ggplot2)
@@ -16,9 +17,10 @@ setwd("/Users/anareis/OneDrive/MECF_R_Project/lab") # mac
 # 1st list the files available using list.files() with the pattern "defort"
 # use the two images in the lab folder (defor.1 and 2) 
 rlist <- list.files(pattern="defor") 
+rlist
 
 # 2nd lappy: apply a function to a list (rlist and brick function to import entire satellite images)
-list_rast <- lapply(rlist, brick)
+list_rast <- lapply(rlist, brick) #lapply(x, FUN)
 list_rast # see separatly the two images separatly 
  
 plot(list_rast[[1]]) # instead of using the "$", use the "colchetes"
@@ -94,8 +96,8 @@ freq(l2006c$map)
 # agricultural areas and water (class 2)
 
 total2006 <- 342726
-propforest2006 <- 178098 / total
-propagri2006 <- 164628 / total
+propforest2006 <- 178098 / total2006
+propagri2006 <- 164628 / total2006
 
 cover <- c("Forest", "Agriculture")
 prop1992 <- c(propforest, propagri)
@@ -106,18 +108,58 @@ proportion2006
 
 proportion <- data.frame(cover, prop1992, prop2006)
 
+proportion # number of prof Rocchini
+# cover  prop1992  prop2006
+# 1      Forest 0.8982982 0.5233744
+# 2 Agriculture 0.1017018 0.4766256
+
 ggplot(proportion1992, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") # identity use the values as they are
 
 ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white") # identity use the values as they are
 
 
-p1 <- ggplot(proportion1992, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white")
-p2 <- ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white")
- 
-grid.arrange(p1, p2, nrows=1)
+p1 <- ggplot(proportion, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+p2 <- ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+
+# recall gridExtra instead of grid.arrange which is the function 
+library(gridExtra)
+
+# plot two graphs with gridExtra package
+grid.arrange(p1, p2, nrow=1)
 
 # change the graphs scale to the same so it could be better to compared adding the "ylim()" argument
 ggplot(proportion, aes(x=cover, y=prop2006, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
 ggplot(proportion, aes(x=cover, y=prop1992, color=cover)) + geom_bar(stat="identity", fill="white") + ylim(0,1)
+
+# the gridExtra package is being supplanted by the fancy patchwork one
+library(patchwork)
+
+# or with patchwork pachage
+p1+p2
+
+# patchwork is working even with raster data, but they should be plotted with
+# instead of using plotRGB we are going to use ggRGB
+plotRGB(l1992, r=1, g=2, b=3, stretch="Lin") # this is the plot that we are used to it
+ggRGB(l1992, r=1, g=2, b=3)
+ggRGB(l1992, r=1, g=2, b=3, stretch="lin") # new way to plot using the ggRGB function and the linear stretch
+ggRGB(l1992, r=1, g=2, b=3, stretch="hist") # histogram
+ggRGB(l1992, r=1, g=2, b=3, stretch="sqrt") # compact the data using the square route. In stastistics, use sqrt or percentage to avoid the extreme numbers
+ggRGB(l1992, r=1, g=2, b=3, stretch="log") # REMEMBER: in R, log means ln (in base e, not 10)
+
+# use patchwork to plot the data all together
+gp1 <- ggRGB(l1992, r=1, g=2, b=3, stretch="lin") 
+gp2 <- ggRGB(l1992, r=1, g=2, b=3, stretch="hist") 
+gp3 <- ggRGB(l1992, r=1, g=2, b=3, stretch="sqrt") 
+gp4 <- ggRGB(l1992, r=1, g=2, b=3, stretch="log")
+gp1+gp2+gp3+gp4
+
+# multitemporal patchwork
+gp1 <- ggRGB(l1992, r=1, g=2, b=3)
+gp5 <- ggRGB(l2006, r=1, g=2, b=3)
+
+gp1+gp5 # one beside the other
+
+gp1/gp5 # one on the top of the other
+
 
 
