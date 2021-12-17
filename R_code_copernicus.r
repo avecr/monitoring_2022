@@ -7,6 +7,7 @@ library(raster)
 library(RStoolbox)
 library(ggplot2)
 library(viridis)
+library(patchwork)
 
 # set the working directory
 setwd("/Users/anareis/OneDrive/MECF_R_Project/lab/copernicus") # mac
@@ -47,3 +48,56 @@ ggplot() + geom_raster(snow20211214, mapping = aes(x = x, y = y, fill = Snow.Cov
 # possible to choose the palette. Here the "cividis" were choosen (see the arcticle about colour-blind people and science arcticles)
 ggplot() + geom_raster(snow20211214, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent)) + scale_fill_viridis("cividis") + ggtitle("cividis palette")
 
+
+#### day 2
+
+# Compare two images downloaded from Copernicus 
+# Use the lapply function with rlist
+
+rlist <- list.files(pattern="SCE") # the pattern taken from the images' names is "SCE"
+rlist
+
+# raster function for single layers and brick function for several layers
+list_rast <- lapply(rlist, raster)
+list_rast
+
+snowstack <- stack(list_rast)
+snowstack
+
+# we're going to use two variables (see the names in R)
+ssummer <- snowstack$Snow.Cover.Extent.1
+swinter <- snowstack$Snow.Cover.Extent.2
+# check the variables
+ssummer
+swinter
+
+# plot the snow cover during the summer 
+ggplot() + geom_raster(ssummer, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent.1)) + scale_fill_viridis(option="viridis") + ggtitle("Snow cover during August 2021")
+
+# plot the snow cover during the winter
+ggplot() + geom_raster(swinter, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent.2)) + scale_fill_viridis(option="viridis") + ggtitle("Snow cover during December 2021")
+
+# let's patchwork them together 
+
+p1 <- ggplot() + geom_raster(ssummer, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent.1)) + scale_fill_viridis(option="viridis") + ggtitle("Snow cover during August 2021")
+
+p2 <- ggplot() + geom_raster(swinter, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent.2)) + scale_fill_viridis(option="viridis") + ggtitle("Snow cover during December 2021")
+
+p1/p2
+
+# let's crop the image on a certain area using crop() function
+
+# longitude from 0 to 20
+# latitude from 30 to 50
+ext <- c(0, 20, 30, 50)
+# stack_cropped <- crop() will crop the whole stack, and 
+
+ssummer_cropped <- crop(ssummer, ext) # put the name of the variable you want to crop and the extension (coordinates)
+swinter_cropped <- crop(swinter, ext)
+
+# use ggplot!
+p1_cropped <- ggplot() + geom_raster(ssummer_cropped, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent.1)) + scale_fill_viridis(option="viridis") + ggtitle("Snow cover during August 2021 cropped")
+
+p2_cropped <- ggplot() + geom_raster(swinter_cropped, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent.2)) + scale_fill_viridis(option="viridis") + ggtitle("Snow cover during December 2021 cropped")
+
+p1_cropped/p2_cropped
