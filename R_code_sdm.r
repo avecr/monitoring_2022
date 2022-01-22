@@ -1,21 +1,26 @@
+# R code for species distribution modelling (sdm), namely the distribution of individuals of a population in a space 
+# sdm package is used for developing species distribution modelling/models (sdm) using individual and community-based approaches
 install.packages(c("sdm","rgdal"))
+
 library(sdm)
 library(raster) # predictors
 library(rgdal) # species: an array of x, y points x0, y0, x1y1...
 
 # species data
-file <- system.file("external/species.shp", package="sdm")
+# system.file is a function to find a certain file
+file <- system.file("external/species.shp", package="sdm") # extention called shape file
 
-file
+file # the path in which the data is inside
 
+# create a shape file inside R using shapefile(): read or write a shape file
 species <- shapefile(file) # exactly as the raster function for raster files
+
+# plot!
+plot(species, pch=19, col="red")
 
 # how many occurrences are there? Subset a DataFrame
 presences <- species[species$Occurrence == 1,]
 absences <- species[species$Occurrence == 0,]
-
-# plot!
-plot(species, phc=19)
 
 # plot presences and absences
 plot(presences, phc=19, col="blue")
