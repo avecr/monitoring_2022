@@ -2,11 +2,8 @@
 
 # the package used is the vegan package, which means "vegetation analysis", but it contains statistics used also with animals  
 install.packages("vegan")
-# sdm package is used for developing species distribution modelling/models (sdm) using individual and community-based approaches
-install.packages("sdm")
 
 library(vegan)
-library(sdm)
 
 # set the working directory
 setwd("/Users/anareis/OneDrive/MECF_R_Project/lab")
@@ -42,6 +39,4 @@ ordispider(multivar, type, col=c("black","red","green","blue"), label=T)
 
 # let's see how the abundances of the individuals are connected to each other
 # we're going to the community level, thus the sdm package must be installed
-
-
-
+# this is in the "R_code_sdm.r"
