@@ -90,7 +90,7 @@ p1/p2
 # longitude from 0 to 20
 # latitude from 30 to 50
 ext <- c(0, 20, 30, 50)
-# stack_cropped <- crop() will crop the whole stack, and 
+# stack_cropped <- crop() this will crop the whole stack, and then single variables (layers) can be extracted
 
 ssummer_cropped <- crop(ssummer, ext) # put the name of the variable you want to crop and the extension (coordinates)
 swinter_cropped <- crop(swinter, ext)
