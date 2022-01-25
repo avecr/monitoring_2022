@@ -36,15 +36,37 @@ blist # check output
 import <- lapply(blist,raster) # the eight files imported inside R
 import # check output
 
+# put all the images together with the stack()
+burntstack <- stack(import)
+burntstack # check output
+
+# change the names of the images in order to make it clearer
+names(burntstack) <- c("September2014",
+                       "September2015",
+                       "September2016",
+                       "September2017",
+                       "September2018",
+                       "September2019",
+                       "September2020",
+                       "September2021")
+
+#--- Making some tests with two variables
+
+# assign to objects two variables 
+burnt2014 <- burntstack$September2014
+burnt2021 <- burntstack$September2021
+
+burnt2014 # check
+burnt2021 # check
+
+# plot the snow cover during the summer 
+ggplot() + 
+geom_raster(burnt2021, mapping = aes(x = x, y = y, fill = September2021)) + 
+scale_fill_viridis(option="inferno") + 
+ggtitle("Burnt area in September 2021")
 
 
 
-
-
-
-<- brick("c_gls_BA300_202109300000_GLOBE_PROBAV_V1.1.1.nc")
-
-test # check output
 
 # crop the image on Brazil's territory
 
