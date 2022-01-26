@@ -37,34 +37,42 @@ import <- lapply(rlist,raster) # the eight files imported inside R
 import # check output
 
 # put all the images together with the stack()
-fcoverstack <- stack(import)
-fcoverstack # check output
+fcstack <- stack(import)
+fcstack # check output
 
 # change the names of the variables to facilitate the interpretation
-names(fcoverstack) <- c("fcover2016","fcover2017","fcover2018","fcover2019","fcover2020")
-                      
-#--- Making some tests with two variables 
+names(fcstack) <- c("fc2016","fc2017","fc2018","fc2019","fc2020")
 
-# assign to objects the variables from 2016 and 2020 (extract them from the stack)
-vegetation2016 <- fcoverstack$fcover2016
-vegetation2020 <- fcoverstack$fcover2020
-
-vegetation2016 # check
-vegetation2020 # check
-
-# plot the vegetation cover in 2016
-ggplot() + geom_raster(ssummer, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent.1)) + scale_fill_viridis(option="viridis") + ggtitle("Snow cover during August 2021")
-
-
-
-# crop the image on Brazil's territory
+#--- Focus on Brazil's territory using crop() 
 
 # longitude from -80 to -30
 # latitude from -40 to 10
 ext <- c(-80, -30, -40, 10)
-# stack_cropped <- crop() this will crop the whole stack, and then single variables (layers) can be extracted
 
-test_cropped <- crop(test, ext) # put the name of the variable you want to crop and the extension (coordinates)
-test_cropped # check output
+# crop all the images in the stack
+fc_cropped <- crop(fcstack, ext) # put the name of the variable you want to crop and the extension (coordinates)
+fc_cropped # check output
 
+#--- Making some tests with two variables 
 
+# assign to objects the variables from 2016 and 2020 (extract them from the stack)
+vegetation2016 <- fc_cropped$fc2016
+vegetation2020 <- fc_cropped$fc2020
+
+vegetation2016 # check
+vegetation2020 # check
+
+# plot the vegetation cover in 2016 and in 2020
+p2016 <- ggplot() + 
+         geom_raster(vegetation2016, mapping = aes(x = x, y = y, fill = fc2016)) + 
+         scale_fill_viridis(option="viridis") + 
+         ggtitle("Vegetation cover in January 2016")
+
+p2020 <- ggplot() + geom_raster(vegetation2020, mapping = aes(x = x, y = y, fill = fc2020)) + scale_fill_viridis(option="viridis") + ggtitle("Vegetation cover in January 2020")
+
+# build a plot with both images using the patchwork
+p2016/p2020
+
+dev.off() # close the plot window
+
+#--- 
