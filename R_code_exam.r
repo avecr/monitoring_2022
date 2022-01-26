@@ -1,9 +1,9 @@
 # R code for the final examination of MECF
-# R code for the analysis of the burnt area in the Brazilian biome Cerrado
-# previously downloaded the Copernicus' data from 2014 to 2021 (Burned Area 300m V1)
-# 8 images, one per year (same month - September - and same period of detection)
+# R code for the analysis of the vegetation cover and its association with land use in the Brazilian biome Cerrado
+# previously downloaded the Copernicus' data from 2016 to 2020 (FCover 1km V2)
+#  images, one per year (same month - January - and same period of detection)
 
-#--- Packages, libraries and working directory
+#--- Packages, libraries and working directoryvegetation
 # to analyse the data, the following packages must be installed
 # install.packages("ncdf4") 
 # install.packages("raster")
@@ -27,44 +27,33 @@ setwd("/Users/anareis/OneDrive/MECF_R_Project/exam")
 #--- Importing Copernicus' data
 # upload the Copernicus data in R using lapply() and raster()
 
-# 1st create a list with all the 8 images (pattern "BA300") and assign to an object 
-blist <- list.files(pattern = "BA300") 
-blist # check output
+# 1st create a list with all the five images (pattern "FCOVER") and assign to an object 
+rlist <- list.files(pattern = "FCOVER") 
+rlist # check output
 
 # 2nd apply the raster() since there are single layers images
 # import the single layers
-import <- lapply(blist,raster) # the eight files imported inside R
+import <- lapply(rlist,raster) # the eight files imported inside R
 import # check output
 
 # put all the images together with the stack()
-burntstack <- stack(import)
-burntstack # check output
+fcoverstack <- stack(import)
+fcoverstack # check output
 
-# change the names of the images in order to make it clearer
-names(burntstack) <- c("September2014",
-                       "September2015",
-                       "September2016",
-                       "September2017",
-                       "September2018",
-                       "September2019",
-                       "September2020",
-                       "September2021")
+# change the names of the variables to facilitate the interpretation
+names(fcoverstack) <- c("fcover2016","fcover2017","fcover2018","fcover2019","fcover2020")
+                      
+#--- Making some tests with two variables 
 
-#--- Making some tests with two variables
+# assign to objects the variables from 2016 and 2020 (extract them from the stack)
+vegetation2016 <- fcoverstack$fcover2016
+vegetation2020 <- fcoverstack$fcover2020
 
-# assign to objects two variables 
-burnt2014 <- burntstack$September2014
-burnt2021 <- burntstack$September2021
+vegetation2016 # check
+vegetation2020 # check
 
-burnt2014 # check
-burnt2021 # check
-
-# plot the snow cover during the summer 
-ggplot() + 
-geom_raster(burnt2021, mapping = aes(x = x, y = y, fill = September2021)) + 
-scale_fill_viridis(option="inferno") + 
-ggtitle("Burnt area in September 2021")
-
+# plot the vegetation cover in 2016
+ggplot() + geom_raster(ssummer, mapping = aes(x = x, y = y, fill = Snow.Cover.Extent.1)) + scale_fill_viridis(option="viridis") + ggtitle("Snow cover during August 2021")
 
 
 
@@ -77,10 +66,5 @@ ext <- c(-80, -30, -40, 10)
 
 test_cropped <- crop(test, ext) # put the name of the variable you want to crop and the extension (coordinates)
 test_cropped # check output
-
-
-
-
-
 
 
