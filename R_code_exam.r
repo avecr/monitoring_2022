@@ -68,11 +68,32 @@ p2016 <- ggplot() +
          scale_fill_viridis(option="viridis") + 
          ggtitle("Vegetation cover in January 2016")
 
-p2020 <- ggplot() + geom_raster(vegetation2020, mapping = aes(x = x, y = y, fill = fc2020)) + scale_fill_viridis(option="viridis") + ggtitle("Vegetation cover in January 2020")
+p2020 <- ggplot() +
+         geom_raster(vegetation2020, mapping = aes(x = x, y = y, fill = fc2020)) +
+         scale_fill_viridis(option="viridis") +
+         ggtitle("Vegetation cover in January 2020")
 
 # build a plot with both images using the patchwork
 p2016/p2020
 
+# check if there is any difference between the two images 
+# create a palette for this difference
+cl <- colorRampPalette(c('blue','white','red'))(100)
+
+fcdif <- vegetation2020 - vegetation2016
+
+plot(fcdif, col=cl)
+
 dev.off() # close the plot window
 
-#--- 
+#--- Importing the territory's boundaries: federation units and Cerrado's limits
+
+# import the federation units' bounderies using readOGR()
+fedunits <- readOGR("BR_UF_2020.shp")
+plot(fedunits)
+
+fb<-fortify(biome) #for change shapefile into a file to use with ggplot
+#plot with ggplot function, group for correct the polygon
+gbiome<-ggplot()+geom_polygon(data=fb,aes(x=long, y=lat, group=group))+theme_bw()
+#now change graphics
+gbiome<-ggplot()+geom_polygon(data=fb,aes(x=long, y=lat, group=group),fill=" green",color="black",lwd=1)+theme_bw()
