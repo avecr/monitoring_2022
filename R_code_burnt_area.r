@@ -22,7 +22,7 @@ library(patchwork) # for composition of layouts in ggplot (mainly) with multiple
 library(rgdal) # ?????
 
 # set the working directory
-setwd("/Users/anareis/OneDrive/MECF_R_Project/exam")
+setwd("/Users/anareis/OneDrive/MECF_R_Project/exam/Burnt Area")
 
 #--- Importing Copernicus' data
 # upload the Copernicus data in R using lapply() and raster()
