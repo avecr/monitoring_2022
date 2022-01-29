@@ -19,7 +19,7 @@ library(RStoolbox) # for putting raster objects inside ggplot2
 library(ggplot2) # for constructing special plots 
 library(viridis) # for color scales readable for colour-blind people
 library(patchwork) # for composition of layouts in ggplot (mainly) with multiple panels
-library(rgdal) # ?????
+library(rgdal) # graphical data abstraction
 
 # set the working directory
 setwd("/Users/anareis/OneDrive/MECF_R_Project/exam")
@@ -269,3 +269,29 @@ hist(lai2020)
 par(mfrow=c(1,2))
 hist(lai2000)
 hist(lai2020)
+
+#--- Analysing Soybean expansion in Cerrado
+# importing two images from southern area of Maranhão e Piauí 
+# image of 2002
+soy2002 <- brick("soy_2002.jpeg") 
+soy2002 # check output
+
+# 3 bands: soy_2002.1, soy_2002.2, soy_2002.3
+# plot the image with plotRGB
+plotRGB(soy2002, r=1, g=2, b=3, stretch="Lin")
+
+# soy_2002.1 = red
+# soy_2002.2 = NIR
+# soy_2002.3 = green
+
+# image of 2018
+soy2018 <- brick("cerradobrazil2018_lrg.jpeg") 
+soy2018 # check output
+
+# 3 bands: soy_2002.1, soy_2002.2, soy_2002.3
+# plot the image with plotRGB
+plotRGB(soy2018, r=1, g=2, b=3, stretch="Lin")
+
+# soy_2002.1 = red
+# soy_2002.2 = NIR
+# soy_2002.3 = green
