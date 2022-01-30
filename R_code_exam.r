@@ -48,9 +48,10 @@ names(vegstack) <- c("FCOVER2006","FCOVER2010","FCOVER2015","FCOVER2016","FCOVER
 cl<- colorRampPalette(c("brown","darkgoldenrod1","darkolivegreen4","darkolivegreen","darkgreen"))(100)
 #plot the images and assign the color
 plot(vegstack, col=cl) # it is not a good plot since does not foccus on the study area
+dev.off() # close window
 
 # export the image (.png)
-png("fcover.png")
+#png("fcover.png")
 plot(vegstack, col=cl)
 dev.off() # close the image's window
 
@@ -91,20 +92,22 @@ p_veg2020 <- ggplot() +
                   ggtitle("Fraction of green vegetation cover - January 2020")
 
 # build a plot with both images using the patchwork and export it
-png("fcover_200620.png")
+#png("fcover_200620.png")
 p_veg2006 - p_veg2020
 dev.off() # close images' window
 
 # analyse the difference between the two images 
 # create a palette for this difference
-cl <- colorRampPalette(c('darkred','darkred', 'darkred', 'darkred', 'aliceblue', 'aliceblue', 'darkgreen', 'darkgreen', 'darkgreen', 'darkgreen'))(100)
+cldif <- colorRampPalette(c('darkred','darkred', 'darkred', 'darkred', 'aliceblue', 'aliceblue', 'darkgreen', 'darkgreen', 'darkgreen', 'darkgreen'))(100)
 
 fcdif0620 <- veg2020 - veg2006
 
-png("fcoverdif2006_20.png")
+#png("fcoverdif2006_20.png")
 plot(fcdif0620, col=cl, main="Difference of FCOVER", sub="Between 2006 and 2020")
 
 dev.off() # close the plot window
+
+# checked 30/01
 
 # let's see the distribution of each image using the hist() function
 # plotting frequency distributions of data
@@ -112,14 +115,14 @@ hist(veg2006)
 hist(veg2020)
 
 # put them together and export the image
-png("hist2006_20.png")
+#png("hist2006_20.png")
 par(mfrow=c(1,2))
 hist(veg2006)
 hist(veg2020)
 dev.off() # close window
 
 # let's see the relationship between the values found in each of the maps/years - regression line
-png("regression2006_20.png") # export the image
+#png("regression2006_20.png") # export the image
 plot(veg2006, veg2020, xlim=c(0,1), ylim=c(0,1))
 abline(0,1,col="red")
 dev.off() #close window
@@ -156,29 +159,41 @@ cerrado <- readOGR("cerrado_area.shp")
 fcerrado <- fortify(cerrado)
 
 #plot with ggplot function, group for correcting the polygon
-fc2006_cerrado <- ggplot() + 
-         geom_raster(veg2006, mapping = aes(x = x, y = y, fill = veg2006)) +
-         scale_fill_viridis(option="plasma") + 
-         geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
-         ggtitle("FCOVER in January 2006")
+fc2006_cerrado <- ggplot() +
+geom_raster(veg2006, mapping = aes(x = x, y = y, fill = FCOVER2006)) +
+scale_fill_viridis(option="plasma") +
+geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
+ggtitle("FCOVER in January 2006")
 
 fc2020_cerrado <- ggplot() + 
-         geom_raster(veg2020, mapping = aes(x = x, y = y, fill = veg2020)) +
+         geom_raster(veg2020, mapping = aes(x = x, y = y, fill = FCOVER2020)) +
          scale_fill_viridis(option="plasma") + 
          geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
          ggtitle("FCOVER in January 2020")
 
-fc2006_cerrado/fc2020_cerrado
+# and export the dif
+#png("fcovercerrado2006_20.png")
+fc2006_cerrado - fc2020_cerrado
+dev.off()
 
-# analyse the difference between the two images 
-# create a palette for this difference
-cl <- colorRampPalette(c('blue','white','red'))(100)
+# analyse the difference between the two images
+cerradodif2006_20 <- ggplot() + 
+         geom_raster(fcdif0620, mapping = aes(x = x, y = y, fill = layer)) +
+         geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
+         scale_fill_viridis(option="plasma") +
+         ggtitle("Dif FCOVER in Cerrado 2006-2020")
 
-vcerradodif <- fc2006_cerrado - fc2020_cerrado ??????
-
-plot(vcerradodif, col=cl)
-
+# plot and export
+# png("fcovercerradodif2006_20.png")
+cerradodif2006_20
 dev.off() # close the plot window
+         
+# make a plot with fcover in Cerrado in 2006 and 2020, and the dif 
+# png("fcovercerrado0620.png")
+fc2006_cerrado / fc2020_cerrado / cerradodif2006_20
+dev.off() # close the plot window
+
+# checked 30/01!!! 
 
 #--- Leaf Area Index (LAI) 1km
 
@@ -200,135 +215,123 @@ laistack <- stack(import2)
 laistack # check output
 
 # change the names of the variables to facilitate the interpretation
-names(laistack) <- c("lai2000","lai2020")
+names(laistack) <- c("lai2006","lai2020")
 
-# plot the images with a palette
-# creat the palette
-cl<- colorRampPalette(c('darkblue','yellow','red','black'))(100)
-#plot the images and assign the color
+# plot the images with cl palette
+#plot the images and export it
+png("lai2006_20.png")
 plot(laistack, col=cl) # it is not a good plot since does not foccus on the study area
-
-#--- Focus on Cerrado's bounder using crop() 
+dev.off() # close window
 
 # crop all the images together in the stack
-laibr <- crop(laistack, extbr)
-laibr # check output
-
-laicerrado <- crop(laistack, extcerrado) 
-laicerrado # check output
-
-#--- Making some tests with two variables (Brazil's territory)
+lai <- crop(laistack, extbr)
+lai # check output
 
 # assign to objects the variables from 2016 and 2020 (extract them from the stack)
-lai2000 <- laibr$lai2000
-lai2020 <- laibr$lai2020
+l2006 <- lai$lai2006
+l2020 <- lai$lai2020
 
-lai2000 # check
-lai2020 # check
+l2006 # check
+l2020 # check
 
-# plot the vegetation cover in 2016 and in 2020
-plai2000 <- ggplot() + 
-         geom_raster(lai2000, mapping = aes(x = x, y = y, fill = lai2000)) +
-         scale_fill_viridis() + #default 
-         ggtitle("Leaf Area Index in June 2000")
+# assign objetcs to the ggplot of 2016 and 2020 with the Cerrado's boundaries
+l2006_plot <- ggplot() +          
+            geom_raster(l2006, mapping = aes(x = x, y = y, fill = lai2006)) +
+            scale_fill_viridis(option="magma") + 
+            geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
+            ggtitle("LAI in January 2006")
 
-plai2020 <- ggplot() +
-         geom_raster(lai2020, mapping = aes(x = x, y = y, fill = lai2020)) +
-         scale_fill_viridis() + #default
-         ggtitle("Leaf Area Index in June 2020")
+l2020_plot <- ggplot() +
+            geom_raster(l2006, mapping = aes(x = x, y = y, fill = lai2006)) +
+            scale_fill_viridis(option="magma") +
+            geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
+            ggtitle("LAI in January 2020")
 
-# build a plot with both images using the patchwork
-plai2000/plai2020
+l2006_plot / l2020_plot # check
+dev.off()
 
-# analyse the difference between the two images 
-# create a palette for this difference
-cl <- colorRampPalette(c('blue','white','red'))(100)
+# and analyse the difference between the two images
+ldif <- l2020 - l2006
+ldif # check names: layer
 
-laidif <- lai2000 - lai2020
+ldif_plot <- ggplot() +
+            geom_raster(ldif, mapping = aes(x = x, y = y, fill = layer)) +
+            scale_fill_viridis(option="magma") +
+            geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
+            ggtitle("Difference of LAI 2006-2020")
 
-plot(laidif, col=cl)
-
+# make a plot with l2006, l2020, and ldif 
+#png("lcerrado0620.png")
+l2006_plot / l2020_plot / ldif_plot
 dev.off() # close the plot window
+
+# checked 30/01!!
 
 # let's see the distribution of each image using the hist() function
 # plotting frequency distributions of data
-hist(lai2000)
-hist(lai2020)
+hist(l2006, maxpixels=1000000)
+hist(l2006)
+hist(l2020)
 
 # put them together
 par(mfrow=c(1,2))
-hist(lai2000)
-hist(lai2020)
+hist(l2006)
+hist(l2020)
 
 # let's see the relationship between the values found in each of the maps/years - regression line
-plot(lai2000, lai2020, xlim=c(0,1), ylim=c(0,1))
+plot(l2006, l2020, xlim=c(0,1), ylim=c(0,1))
 abline(0,1,col="red")
 
-#--- Making some tests with two variables (Cerrado's territory)
+#--- Analysing Soybean expansion in the "Matopiba" region in Cerrado
 
-# assign to objects the variables from 2016 and 2020 (extract them from the stack)
-laicerrado2000 <- laicerrado$lai2000
-laicerrado2020 <- laicerrado$lai2020
+# use the DVI to measure the "greenness" of the biome  
+# importing two images from Google Earth (both from the same period - december)
+# image of 2006
+soy2006 <- brick("gearth1.jpg") 
+soy2006 # check output: 3 bands - gearth1.1, gearth1.2, gearth1.3
 
-laicerrado2000 # check
-laicerrado2020 # check
-
-# plot the vegetation cover in 2016 and in 2020
-plaicerrado2000 <- ggplot() + 
-         geom_raster(laicerrado2000, mapping = aes(x = x, y = y, fill = lai2000)) +
-         scale_fill_viridis() + #default 
-         ggtitle("LAI in Cerrado - Jan 2000")
-
-plaicerrado2020 <- ggplot() +
-         geom_raster(laicerrado2020, mapping = aes(x = x, y = y, fill = lai2020)) +
-         scale_fill_viridis() + #default
-         ggtitle("LAI in Cerrado - Jan 2020")
-
-# build a plot with both images using the patchwork
-plaicerrado2000/plaicerrado2020
-
-# analyse the difference between the two images 
-# create a palette for this difference
-cl <- colorRampPalette(c('red', 'white','blue'))(100)
-
-laicerradodif <- laicerrado2020 - laicerrado2000
-
-plot(laicerradodif, col=cl)
-
-dev.off() # close the plot window
-
-# let's see the distribution of each image using the hist() function
-# plotting frequency distributions of data
-hist(lai2000)
-hist(lai2020)
-
-# put them together
-par(mfrow=c(1,2))
-hist(lai2000)
-hist(lai2020)
-
-#--- Analysing Soybean expansion in Cerrado
-# importing two images from southern area of Maranhão e Piauí 
-# image of 2002
-soy2002 <- brick("soy_2002.jpeg") 
-soy2002 # check output
-
-# 3 bands: soy_2002.1, soy_2002.2, soy_2002.3
 # plot the image with plotRGB
-plotRGB(soy2002, r=1, g=2, b=3, stretch="Lin")
+plotRGB(soy2006, r=1, g=2, b=3, stretch="Lin")
+# with certanty, the NIR is in the gearth1.1 band. Possibly, the other bands could be:
+# gearth1.2 = red
+# gearth1.3 = green
 
-# soy_2002.1 = red
-# soy_2002.2 = NIR
-# soy_2002.3 = green
+# image of 2020
+soy2020 <- brick("gearth2.jpg") 
+soy2020 # check output: 3 bands - gearth2.1, gearth2.2, gearth2.3
 
-# image of 2018
-soy2018 <- brick("soy_2018.jpeg") 
-soy2018 # check output
-
-# 3 bands: soy_2002.1, soy_2002.2, soy_2002.3
 # plot the image with plotRGB
-plotRGB(soy2018, r=1, g=2, b=3, stretch="Lin")
+plotRGB(soy2020, r=1, g=2, b=3, stretch="Lin")
+# with certanty, the NIR is in the gearth1.1 band. Possibly, the other bands could be:
+# gearth2.2 = red
+# gearth2.3 = green
 
-# soy_2002.1 = red
-# soy_2002.2 = NIR
-# soy_2002.3 = green
+# calculate the DVI of 2006 and 2020
+dvi2006 <- soy2006$gearth1.1 - soy2006$gearth1.2
+
+# choose the color palette
+dvicl <- colorRampPalette(c('darkblue','yellow','red','black'))(100)
+
+plot(dvi2006, col=dvicl)
+
+# now the 2020 image
+dvi2020 <- soy2020$gearth2.1 - soy2020$gearth2.2
+
+plot(dvi2020, col=dvicl)
+
+# make the difference between the two images
+dvidif <- dvi2006 - dvi2020
+
+# plot the results
+dcl <- colorRampPalette(c('blue','white','red'))(100) 
+plot(dvidif, col=cld)
+
+# final plot with par(): original images, DVIs, and final DVIs difference (total of five images)
+#png("soymatopiba.png")
+par(mfrow=c(3,2))
+plotRGB(soy2006, r=1, g=2, b=3, stretch="Lin")
+plotRGB(soy2020, r=1, g=2, b=3, stretch="Lin")
+plot(dvi2006, col=dvicl)
+plot(dvi2020, col=dvicl)
+plot(dvidif, col=cld)
+dev.off()
