@@ -25,9 +25,8 @@ library(rgdal) # graphical data abstraction
 setwd("/Users/anareis/OneDrive/MECF_R_Project/exam")
 
 #--- Importing Copernicus' data
-# upload the Copernicus data in R using lapply() and raster()
 
-# FCOVER 1km V2
+# upload the Copernicus data of FCOVER (1km V2) in R using lapply() and raster()
 # 1st create a list with all the five images (pattern "FCOVER") and assign to an object 
 rlist <- list.files(pattern = "FCOVER") 
 rlist # check output
@@ -42,106 +41,144 @@ vegstack <- stack(import)
 vegstack # check output
 
 # change the names of the variables to facilitate the interpretation
-names(vegstack) <- c("veg2006","veg2016","veg2017","veg2018","veg2019","veg2020")
+names(vegstack) <- c("FCOVER2006","FCOVER2010","FCOVER2015","FCOVER2016","FCOVER2017","FCOVER2018","FCOVER2019","FCOVER2020")
 
 # plot the images with a palette
 # creat the palette
-cl<- colorRampPalette(c('darkblue','yellow','red','black'))(100)
+cl<- colorRampPalette(c("brown","darkgoldenrod1","darkolivegreen4","darkolivegreen","darkgreen"))(100)
 #plot the images and assign the color
 plot(vegstack, col=cl) # it is not a good plot since does not foccus on the study area
 
-#--- Focus on Cerrado's bounder using crop() 
+# export the image (.png)
+png("fcover.png")
+plot(vegstack, col=cl)
+dev.off() # close the image's window
+
+#--- Focus on Cerrado's using crop() and ggplot+geom_polygon 
 
 # 1st, Brazil's territory: longitude -80 to -30 and latitude -40 to 10
 extbr <- c(-80, -30, -40, 10)
 
 # then, the Cerrado's one: long -60 to -45 and lat -20 to -5
-extcerrado <- c(-60, -45, -20, -05)
+# extcerrado <- c(-60, -45, -20, -05)
 
-# crop all the images together in the stack
-vbr <- crop(vegstack, extbr) # put the name of the variable you want to crop and the extension (coordinates)
-vbr # check output
+# crop all the images (in the stack)
+v_cropped <- crop(vegstack, extbr) # put the name of the variable you want to crop and the extension (coordinates)
+v_cropped # check output
+
 # and 
-vcerrado <- crop(vegstack, extcerrado) # put the name of the variable you want to crop and the extension (coordinates)
-vcerrado # check output
+# vcerrado <- crop(vegstack, extcerrado) # put the name of the variable you want to crop and the extension (coordinates)
+# vcerrado # check output
 
-#--- Making some tests with two variables 
+#--- Analysing first and last images
 
-# assign to objects the variables from 2016 and 2020 (extract them from the stack)
-vcerrado2006 <- vcerrado$veg2006
-vcerrado2020 <- vcerrado$veg2020
+# assign to objects the variables from 2006 and 2020 (extract them from the stack)
+veg2006 <- v_cropped$FCOVER2006
+veg2020 <- v_cropped$FCOVER2020
 
-vcerrado2006 # check
-vcerrado2020 # check
+veg2006 # check
+veg2020 # check
 
-# plot the vegetation cover in 2016 and in 2020
-p2006 <- ggplot() + 
-         geom_raster(vcerrado2006, mapping = aes(x = x, y = y, fill = veg2006)) +
-         scale_fill_viridis() #default + 
-         ggtitle("Vegetation cover in January 2016")
+# plot the vegetation cover in 2006 and in 2020
+p_veg2006 <- ggplot() + 
+                  geom_raster(veg2006, mapping = aes(x = x, y = y, fill = FCOVER2006)) +
+                  scale_fill_viridis(option="plasma") + 
+                  ggtitle("Fraction of green vegetation cover - January 2006")
 
-p2020 <- ggplot() +
-         geom_raster(vcerrado2020, mapping = aes(x = x, y = y, fill = veg2020)) +
-         scale_fill_viridis() #default +
-         ggtitle("Vegetation cover in January 2020")
+p_veg2020 <- ggplot() + 
+                  geom_raster(veg2020, mapping = aes(x = x, y = y, fill = FCOVER2020)) +
+                  scale_fill_viridis(option="plasma") + 
+                  ggtitle("Fraction of green vegetation cover - January 2020")
 
-# build a plot with both images using the patchwork
-p2006/p2020
+# build a plot with both images using the patchwork and export it
+png("fcover_200620.png")
+p_veg2006 - p_veg2020
+dev.off() # close images' window
 
 # analyse the difference between the two images 
 # create a palette for this difference
-cl <- colorRampPalette(c('blue','white','red'))(100)
+cl <- colorRampPalette(c('darkred','darkred', 'darkred', 'darkred', 'aliceblue', 'aliceblue', 'darkgreen', 'darkgreen', 'darkgreen', 'darkgreen'))(100)
 
-vcerradodif <- vcerrado2006 - vcerrado2020
+fcdif0620 <- veg2020 - veg2006
 
-plot(vcerradodif, col=cl)
+png("fcoverdif2006_20.png")
+plot(fcdif0620, col=cl, main="Difference of FCOVER", sub="Between 2006 and 2020")
 
 dev.off() # close the plot window
 
 # let's see the distribution of each image using the hist() function
 # plotting frequency distributions of data
-hist(vcerrado2006)
-hist(vcerrado2020)
+hist(veg2006)
+hist(veg2020)
 
-# put them together
+# put them together and export the image
+png("hist2006_20.png")
 par(mfrow=c(1,2))
-hist(vcerrado2006)
-hist(vcerrado2020)
+hist(veg2006)
+hist(veg2020)
+dev.off() # close window
 
 # let's see the relationship between the values found in each of the maps/years - regression line
-plot(vcerrado2006, vcerrado2020, xlim=c(0,1), ylim=c(0,1))
+png("regression2006_20.png") # export the image
+plot(veg2006, veg2020, xlim=c(0,1), ylim=c(0,1))
 abline(0,1,col="red")
+dev.off() #close window
 
 # make a plot with all the histograms and all the regressions for all the variables, all together
 par(mfrow=c(4,4))
-hist(vcerrado2006)
-hist(vcerrado2006)
-hist(vcerrado2006)
-hist(vcerrado2006)
-hist(vcerrado2006)
-plot(vcerrado2006, vcerrado2006, xlim=c(0,1), ylim=c(0,1))
-plot(vcerrado2006, vcerrado2006, xlim=c(0,1), ylim=c(0,1))
-plot(vcerrado2006, vcerrado2006, xlim=c(0,1), ylim=c(0,1))
-plot(vcerrado2006, vcerrado2006, xlim=c(0,1), ylim=c(0,1))
+hist(veg2006)
+hist(veg2010)
+hist(veg2015)
+hist(veg2016)
+hist(veg2017)
+hist(veg2018)
+hist(veg2019)
+hist(veg2020)
+plot(veg2006, veg2010, xlim=c(0,1), ylim=c(0,1))
+plot(veg2006, veg2015, xlim=c(0,1), ylim=c(0,1))
+plot(veg2006, veg2016, xlim=c(0,1), ylim=c(0,1))
+plot(veg2006, veg2017, xlim=c(0,1), ylim=c(0,1))
+plot(veg2006, veg2018, xlim=c(0,1), ylim=c(0,1))
+plot(veg2006, veg2019, xlim=c(0,1), ylim=c(0,1))
+plot(veg2006, veg2020, xlim=c(0,1), ylim=c(0,1))
 
 #--- Importing the territory's boundaries: federation units and Cerrado's limits
 
 # import the federation units' bounderies using readOGR() and the shape file from https://portaldemapas.ibge.gov.br/portal.php#homepage
-funits <- readOGR("BR_UF_2020.shp")
-plot(funits) # imported succesfully
+# funits <- readOGR("BR_UF_2020.shp")
+# plot(funits) # imported succesfully
 
 # now, the Cerrado's border using the shape file from http://terrabrasilis.dpi.inpe.br/downloads/
-cerrado <- readOGR("cerrado_border.shp")
-plot(cerrado) # imported succesfully
+cerrado <- readOGR("cerrado_area.shp")
+#plot(cerrado) # imported succesfully
 
 # now, use fortify() to get a dataframe format required by ggplot2
 fcerrado <- fortify(cerrado)
 
 #plot with ggplot function, group for correcting the polygon
-gcerrado <- ggplot()+geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group))+theme_bw()
-#now change graphics
-gbiome<-ggplot()+geom_polygon(data=fb,aes(x=long, y=lat, group=group),fill="green",color="black",lwd=1)+theme_bw()
+fc2006_cerrado <- ggplot() + 
+         geom_raster(veg2006, mapping = aes(x = x, y = y, fill = veg2006)) +
+         scale_fill_viridis(option="plasma") + 
+         geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
+         ggtitle("FCOVER in January 2006")
 
+fc2020_cerrado <- ggplot() + 
+         geom_raster(veg2020, mapping = aes(x = x, y = y, fill = veg2020)) +
+         scale_fill_viridis(option="plasma") + 
+         geom_polygon(data=fcerrado,aes(x=long, y=lat, group=group), fill="transparent",color="black",lwd=0.8) +
+         ggtitle("FCOVER in January 2020")
+
+fc2006_cerrado/fc2020_cerrado
+
+# analyse the difference between the two images 
+# create a palette for this difference
+cl <- colorRampPalette(c('blue','white','red'))(100)
+
+vcerradodif <- fc2006_cerrado - fc2020_cerrado ??????
+
+plot(vcerradodif, col=cl)
+
+dev.off() # close the plot window
 
 #--- Leaf Area Index (LAI) 1km
 
@@ -285,7 +322,7 @@ plotRGB(soy2002, r=1, g=2, b=3, stretch="Lin")
 # soy_2002.3 = green
 
 # image of 2018
-soy2018 <- brick("cerradobrazil2018_lrg.jpeg") 
+soy2018 <- brick("soy_2018.jpeg") 
 soy2018 # check output
 
 # 3 bands: soy_2002.1, soy_2002.2, soy_2002.3
