@@ -1,7 +1,7 @@
 # R code for the final examination of MECF
 # R code for the analysis of the vegetation cover and its association with land use in the Brazilian biome Cerrado
 # previously downloaded the Copernicus' data from 2016 to 2020 (FCover 1km V2)
-#  images, one per year (same month - January - and same period of detection)
+# images, one per year (same month - January - and same period of detection)
 
 #--- Packages, libraries and working directoryvegetation
 # to analyse the data, the following packages must be installed
@@ -27,7 +27,7 @@ setwd("/Users/anareis/OneDrive/MECF_R_Project/exam")
 #--- Importing Copernicus' data
 
 # upload the Copernicus data of FCOVER (1km V2) in R using lapply() and raster()
-# 1st create a list with all the five images (pattern "FCOVER") and assign to an object 
+# 1st create a list with all the eight images (pattern "FCOVER") and assign to an object 
 rlist <- list.files(pattern = "FCOVER") 
 rlist # check output
 
@@ -51,11 +51,11 @@ plot(vegstack, col=cl) # it is not a good plot since does not foccus on the stud
 dev.off() # close window
 
 # export the image (.png)
-#png("fcover.png")
+png("fcover.png")
 plot(vegstack, col=cl)
 dev.off() # close the image's window
 
-#--- Focus on Cerrado's using crop() and ggplot+geom_polygon 
+#--- Focus on Cerrado using crop() and ggplot+geom_polygon 
 
 # 1st, Brazil's territory: longitude -80 to -30 and latitude -40 to 10
 extbr <- c(-80, -30, -40, 10)
@@ -92,8 +92,8 @@ p_veg2020 <- ggplot() +
                   ggtitle("Fraction of green vegetation cover - January 2020")
 
 # build a plot with both images using the patchwork and export it
-#png("fcover_200620.png")
-p_veg2006 - p_veg2020
+png("fcover_200620.png")
+p_veg2006 / p_veg2020
 dev.off() # close images' window
 
 # analyse the difference between the two images 
@@ -106,8 +106,6 @@ fcdif0620 <- veg2020 - veg2006
 plot(fcdif0620, col=cl, main="Difference of FCOVER", sub="Between 2006 and 2020")
 
 dev.off() # close the plot window
-
-# checked 30/01
 
 # let's see the distribution of each image using the hist() function
 # plotting frequency distributions of data
@@ -123,27 +121,9 @@ dev.off() # close window
 
 # let's see the relationship between the values found in each of the maps/years - regression line
 #png("regression2006_20.png") # export the image
-plot(veg2006, veg2020, xlim=c(0,1), ylim=c(0,1))
-abline(0,1,col="red")
-dev.off() #close window
-
-# make a plot with all the histograms and all the regressions for all the variables, all together
-par(mfrow=c(4,4))
-hist(veg2006)
-hist(veg2010)
-hist(veg2015)
-hist(veg2016)
-hist(veg2017)
-hist(veg2018)
-hist(veg2019)
-hist(veg2020)
-plot(veg2006, veg2010, xlim=c(0,1), ylim=c(0,1))
-plot(veg2006, veg2015, xlim=c(0,1), ylim=c(0,1))
-plot(veg2006, veg2016, xlim=c(0,1), ylim=c(0,1))
-plot(veg2006, veg2017, xlim=c(0,1), ylim=c(0,1))
-plot(veg2006, veg2018, xlim=c(0,1), ylim=c(0,1))
-plot(veg2006, veg2019, xlim=c(0,1), ylim=c(0,1))
-plot(veg2006, veg2020, xlim=c(0,1), ylim=c(0,1))
+#plot(veg2006, veg2020, xlim=c(0,1), ylim=c(0,1))
+#abline(0,1,col="red")
+#dev.off() #close window
 
 #--- Importing the territory's boundaries: federation units and Cerrado's limits
 
@@ -172,8 +152,8 @@ fc2020_cerrado <- ggplot() +
          ggtitle("FCOVER in January 2020")
 
 # and export the dif
-#png("fcovercerrado2006_20.png")
-fc2006_cerrado - fc2020_cerrado
+png("fcovercerrado2006_20.png")
+fc2006_cerrado / fc2020_cerrado
 dev.off()
 
 # analyse the difference between the two images
@@ -192,8 +172,6 @@ dev.off() # close the plot window
 # png("fcovercerrado0620.png")
 fc2006_cerrado / fc2020_cerrado / cerradodif2006_20
 dev.off() # close the plot window
-
-# checked 30/01!!! 
 
 #--- Leaf Area Index (LAI) 1km
 
@@ -217,10 +195,9 @@ laistack # check output
 # change the names of the variables to facilitate the interpretation
 names(laistack) <- c("lai2006","lai2020")
 
-# plot the images with cl palette
-#plot the images and export it
+# plot the images with cl palette and export it
 png("lai2006_20.png")
-plot(laistack, col=cl) # it is not a good plot since does not foccus on the study area
+plot(laistack, ylim=c(-90,90), col=cl) # it is not a good plot since does not foccus on the study area
 dev.off() # close window
 
 # crop all the images together in the stack
@@ -261,26 +238,24 @@ ldif_plot <- ggplot() +
             ggtitle("Difference of LAI 2006-2020")
 
 # make a plot with l2006, l2020, and ldif 
-#png("lcerrado0620.png")
-l2006_plot / l2020_plot / ldif_plot
+png("lcerrado0620.png")
+l2006_plot - l2020_plot - ldif_plot
 dev.off() # close the plot window
-
-# checked 30/01!!
 
 # let's see the distribution of each image using the hist() function
 # plotting frequency distributions of data
-hist(l2006, maxpixels=1000000)
-hist(l2006)
-hist(l2020)
+# hist(l2006, maxpixels=1000000)
+# hist(l2006)
+# hist(l2020)
 
 # put them together
-par(mfrow=c(1,2))
-hist(l2006)
-hist(l2020)
+# par(mfrow=c(1,2))
+# hist(l2006)
+# hist(l2020)
 
 # let's see the relationship between the values found in each of the maps/years - regression line
-plot(l2006, l2020, xlim=c(0,1), ylim=c(0,1))
-abline(0,1,col="red")
+# plot(l2006, l2020, xlim=c(0,1), ylim=c(0,1))
+# abline(0,1,col="red")
 
 #--- Analysing Soybean expansion in the "Matopiba" region in Cerrado
 
@@ -327,11 +302,11 @@ dcl <- colorRampPalette(c('blue','white','red'))(100)
 plot(dvidif, col=cld)
 
 # final plot with par(): original images, DVIs, and final DVIs difference (total of five images)
-#png("soymatopiba.png")
+png("soymatopiba.png")
 par(mfrow=c(3,2))
-plotRGB(soy2006, r=1, g=2, b=3, stretch="Lin")
-plotRGB(soy2020, r=1, g=2, b=3, stretch="Lin")
-plot(dvi2006, col=dvicl)
-plot(dvi2020, col=dvicl)
-plot(dvidif, col=cld)
+plotRGB(soy2006, r=1, g=2, b=3, stretch="Lin", main="Image of 2006")
+plotRGB(soy2020, r=1, g=2, b=3, stretch="Lin", main="Image of 2020")
+plot(dvi2006, col=dvicl, main="DVI of 2006")
+plot(dvi2020, col=dvicl, main="DVI of 2020")
+plot(dvidif, col=cld, main="Difference of DVIs")
 dev.off()
